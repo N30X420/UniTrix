@@ -6,7 +6,7 @@ This is an automated script to manage your Ubiquiti Unifi Network Controller for
 
 ## Features
 There are a few features already present and more will be added in the future
--------------------
+
 1. Install Service - Installs the Unifi Network Controller as a service in Windows
 2. Uninstall Service - Removes the installed Unifi Network Controller service from Windows
 3. Start Service - Starts the Unifi Network Controller Service in Windows
