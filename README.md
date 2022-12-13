@@ -1,6 +1,6 @@
 # UniTrix
 -------------------------------------------------
-Unifi Controller Management Script - By MATRIXNET
+Unifi Controller Management Script - By Vincent | MATRIXNET
 -------------------------------------------------
 This is an automated script to manage your Ubiquiti Unifi Network Controller for Windows
 
@@ -12,7 +12,7 @@ There are a few features already present and more will be added in the future
 3. Start Service - Starts the Unifi Network Controller Service in Windows
 4. Stop Service - Stops the Unifi Network Controller Service in Windows
 5. Restart Service - Restarts the Unifi Network Controller Service in Windows
-6. Update Controller - Updates the Unifi Network Controller to the latest version
+6. Update Controller - Updates the Unifi Network Controller to the latest version (Currently not working)
 7. Update Certificate - Updates the SSL Certificate used by the Unifi Network Controller (See notes below!)
 8. Exit - Closes UniTrix
 
@@ -20,9 +20,14 @@ There are a few features already present and more will be added in the future
 Just run the binary UniTrix.exe from your desktop.
 Then use the arrow keys and enter to navigate the menu.
 
-
 ## Notes
 The script relies on Certify the Web for providing the certificates.
+
+## To Do
+- Menu Art
+- Fix controller updater
+- Implement a way to check if required dependencies are installed
+- .ini file for changing important variables that the binary uses.
 
 ## Debugging
 Logs are saved in C:\INSTALL\UniTrix-2.0\UniTrix-2.0-xx-xx-xxxx_xx-xx-xx.log
