@@ -13,59 +13,6 @@ $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
 #######################################
-#######################################
-# Configurable Variables by Config File
-#--------------------------------------
-$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
-$ScriptDir = "C:\Users\vincent\Desktop\Github Repositories\UniTrix\Source"
-$ScriptDir += "\$ProgramName.cfg"
-$ScriptConfig = $ScriptDir
-
-# Check for UniTrix.cfg
-if (-Not (Test-Path $ScriptConfig)){
-    Write-Host "Config file not found" -ForegroundColor Red
-    Start-Sleep -Seconds 2
-    New-Item -ItemType File -Path $ScriptConfig | Out-Null
-    Add-Content -Path $ScriptConfig -Value "FQDN = "
-    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
-    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
-    #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
-    #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
-    #Add-Content -Path $ScriptConfig -Value "JavaBin = "
-    Write-Host "Config File Created" -ForegroundColor Yellow
-    write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
-    Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
-    $error.Add("Unconfigured Config file") | Out-Null
-    Start-Sleep -Seconds 5
-    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
-
-# Read Config file
-$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
-
-# Define vars from config file
-$fqdn = $ScriptVars['FQDN']
-$ControllerVersion = $ScriptVars['Controller-Version']
-
-# Check if vars from config file are configured
-if ($fqdn -eq "") {
-    Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
-    $error.Add("FQDN not specified") | Out-Null
-    Start-Sleep -Seconds 5
-    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
-if ($ControllerVersion -eq "") {
-    Write-Host "Controller version not specified in $ProgramName.cfg" -ForegroundColor Red
-    $error.Add("version not specified") | Out-Null
-    Start-Sleep -Seconds 5
-    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
 
 ###################################
 ####
@@ -235,19 +182,21 @@ function UI_UPDATE_SVC {
         UI_STOP_SVC
         start-sleep -Seconds 2
         UI_UNINSTALL_SVC
-        Write-Host "Fetching Controller Update" -ForegroundColor Yellow
-        Start-Sleep -Seconds 5
-        Write-Host "Downloading version $ControllerVersion" -ForegroundColor Yellow
-        Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$ControllerVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
-        Write-Host "Update downloaded" -ForegroundColor Yellow
-        
+        Write-Host "Would you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow
+        $DownloadManual = $Host.UI.RawUI.ReadKey()
+        if ($DownloadManual.Character -eq "N"){
+            Write-Host "Enter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
+            $CustomVersion = Read-Host "Custom Version"
+            Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
+            Write-Host "Update downloaded" -ForegroundColor Yellow
+        }
 
         else {
             Write-Host "Manually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
         }
 
-        if ($null -ne $CustomVersion) {
+        if ($null -eq $CustomVersion) {
             $UpdateFileLocation = "$tempdir\Unifi-installer.exe"
         }
         else {
@@ -323,11 +272,6 @@ function UI_EXIT {
     
 }
 
-
-
-
-
-
 #####################################################################
 # Main Code --- Main Code --- Main Code --- Main Code --- Main Code #
 #-------------------------------------------------------------------#
@@ -380,10 +324,56 @@ Write-Host " "
 Write-Host " "
 Write-Host "################ LOG BEGIN ################"
 
+#######################################
+# Configurable Variables by Config File
+#--------------------------------------
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
+$ScriptDir = "C:\Users\vincent\Desktop\Github Repositories\UniTrix\Source"
+$ScriptDir += "\$ProgramName.cfg"
+$ScriptConfig = $ScriptDir
 
+# Check for UniTrix.cfg
+if (-Not (Test-Path $ScriptConfig)){
+    Write-Host "Config file not found" -ForegroundColor Red
+    Start-Sleep -Seconds 2
+    New-Item -ItemType File -Path $ScriptConfig | Out-Null
+    Add-Content -Path $ScriptConfig -Value "FQDN = "
+    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
+    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
+    #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
+    #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
+    #Add-Content -Path $ScriptConfig -Value "JavaBin = "
+    Write-Host "Config File Created" -ForegroundColor Yellow
+    write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
+    Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
+    $error.Add("Unconfigured Config file") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+# Read Config file
+$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
+
+# Define vars from config file
+$fqdn = $ScriptVars['FQDN']
+
+# Check if vars from config file are configured
+if ($fqdn -eq "") {
+    Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
+    $error.Add("FQDN not specified") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+##################################
+# Begin Loop
 $WhileLoopVar = 1
 while ($WhileLoopVar -eq 1){
-
+##################################
 ##################################
 # Interactive Menu #
 ##################################
