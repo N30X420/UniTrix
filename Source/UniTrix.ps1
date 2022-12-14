@@ -67,6 +67,14 @@ function SplashLogo {
     Write-Host ""
 }
 
+function Logo {
+    Write-Host " "
+    Write-Host "     __  __     _ ______    _" -ForegroundColor Blue
+    write-host "    / / / /__  (_)_  __/___(_)_ __" -ForegroundColor Blue
+    Write-Host "   / /_/ / _ \/ / / / / __/ /\ \ /" -ForegroundColor Blue
+    Write-Host "   \____/_//_/_/ /_/ /_/ /_//_\_\" -ForegroundColor Blue
+    write-Host "v$version" -ForegroundColor Blue
+}
 
 function UI_INSTALL_SVC {
     Write-Host "`nInstalling Unifi Service" -ForegroundColor Yellow
@@ -336,6 +344,7 @@ $ymin = 3
  
 #Write Menu
 Clear-Host
+Logo
 Write-Host ""
 Write-Host "  Use the up / down arrow to navigate and Enter to make a selection"
 [Console]::SetCursorPosition(0, $ymin)

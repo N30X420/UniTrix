@@ -19,9 +19,12 @@ There are a few features already present and more will be added in the future
 ## How to use ?
 Just run the binary UniTrix.exe from your desktop.
 Then use the arrow keys and enter to navigate the menu.
+Make sure you have all the dependencies installed on your system. For a list please see the notes section below.
 
 ## Notes
-The script relies on Certify the Web for providing the certificates.
+### Dependencies
+- CertifyTheWeb (Script checks for certificates in C:\ProgramData\Certify\Assets\)
+- Eclipse Adoptium - JDK-11.x (For keytool & Unifi relies on Java 11)
 
 ## To Do
 - Menu Art
