@@ -1,7 +1,6 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$fqdn = "ubnt.matrixnet.me"
 $version = "2.0"
 $ProgramName = "UniTrix"
 ########################################
@@ -14,6 +13,52 @@ $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
 #######################################
+#######################################
+# Configurable Variables by Config File
+#--------------------------------------
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
+$ScriptDir = "C:\Users\vincent\Desktop\Github Repositories\UniTrix\Source"
+$ScriptDir += "\$ProgramName.cfg"
+$ScriptConfig = $ScriptDir
+
+# Check for UniTrix.cfg
+if (-Not (Test-Path $ScriptConfig)){
+    Write-Host "Config file not found" -ForegroundColor Red
+    Start-Sleep -Seconds 2
+    New-Item -ItemType File -Path $ScriptConfig | Out-Null
+    Add-Content -Path $ScriptConfig -Value "fqdn = "
+    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
+    #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
+    #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
+    #Add-Content -Path $ScriptConfig -Value "JavaBin = "
+    Write-Host "Config File Created" -ForegroundColor Yellow
+    write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
+    Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
+    $error.Add("Unconfigured Config file") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+# Read Config file
+$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
+
+# Define vars from config file
+$fqdn = $ScriptVars['fqdn']
+
+# Check if vars from config file are configured
+if ($fqdn -eq "") {
+    Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
+    $error.Add("FQDN not specified") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+###################################
+####
 # Functions
 #--------------------------------------
 # Logo
@@ -67,6 +112,14 @@ function SplashLogo {
     Write-Host ""
 }
 
+function Logo {
+    Write-Host " "
+    Write-Host "     __  __     _ ______    _" -ForegroundColor Blue
+    write-host "    / / / /__  (_)_  __/___(_)_ __" -ForegroundColor Blue
+    Write-Host "   / /_/ / _ \/ / / / / __/ /\ \ /" -ForegroundColor Blue
+    Write-Host "   \____/_//_/_/ /_/ /_/ /_//_\_\" -ForegroundColor Blue
+    write-Host "v$version" -ForegroundColor Blue
+}
 
 function UI_INSTALL_SVC {
     Write-Host "`nInstalling Unifi Service" -ForegroundColor Yellow
@@ -336,6 +389,10 @@ $ymin = 3
  
 #Write Menu
 Clear-Host
+Logo
+Write-Host ""
+Write-Host ""
+Write-Host ""
 Write-Host ""
 Write-Host "  Use the up / down arrow to navigate and Enter to make a selection"
 [Console]::SetCursorPosition(0, $ymin)
