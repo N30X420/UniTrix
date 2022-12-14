@@ -26,7 +26,8 @@ if (-Not (Test-Path $ScriptConfig)){
     Write-Host "Config file not found" -ForegroundColor Red
     Start-Sleep -Seconds 2
     New-Item -ItemType File -Path $ScriptConfig | Out-Null
-    Add-Content -Path $ScriptConfig -Value "fqdn = "
+    Add-Content -Path $ScriptConfig -Value "FQDN = "
+    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
     #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
     #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
     #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
@@ -45,12 +46,21 @@ if (-Not (Test-Path $ScriptConfig)){
 $ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
 
 # Define vars from config file
-$fqdn = $ScriptVars['fqdn']
+$fqdn = $ScriptVars['FQDN']
+$ControllerVersion = $ScriptVars['Controller-Version']
 
 # Check if vars from config file are configured
 if ($fqdn -eq "") {
     Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
     $error.Add("FQDN not specified") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+if ($ControllerVersion -eq "") {
+    Write-Host "Controller version not specified in $ProgramName.cfg" -ForegroundColor Red
+    $error.Add("version not specified") | Out-Null
     Start-Sleep -Seconds 5
     Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
     $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -226,14 +236,11 @@ function UI_UPDATE_SVC {
         start-sleep -Seconds 2
         UI_UNINSTALL_SVC
         Write-Host "Fetching Controller Update" -ForegroundColor Yellow
-        Write-Host "Press any key to use a custom version or wait 5 seconds" -ForegroundColor Yellow
         Start-Sleep -Seconds 5
-        if($host.UI.RawUI.KeyAvailable){
-           $CustomVersion = Read-Host "Custom Version"
-           Write-Host "Downloading version $CustomVersion" -ForegroundColor Yellow
-           Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
-           Write-Host "Update downloaded" -ForegroundColor Yellow
-        }
+        Write-Host "Downloading version $ControllerVersion" -ForegroundColor Yellow
+        Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$ControllerVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
+        Write-Host "Update downloaded" -ForegroundColor Yellow
+        
 
         else {
             Write-Host "Manually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
