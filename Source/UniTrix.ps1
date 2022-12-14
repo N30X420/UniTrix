@@ -385,7 +385,7 @@ $list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE'
  
 #menu offset to allow space to write a message above the menu
 $xmin = 3
-$ymin = 3
+$ymin = 6
  
 #Write Menu
 Clear-Host
