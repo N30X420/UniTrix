@@ -319,7 +319,7 @@ if (-Not (Test-Path $tempdir)){
 
 # Start Logging in Install directory (Tempdir)
 $CurDate = Get-Date -Format "dd/MM/yyyy_HH/mm/ss"
-Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log"
+Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log" | Out-Null
 Write-Host " "
 Write-Host " "
 Write-Host "################ LOG BEGIN ################"
@@ -327,8 +327,7 @@ Write-Host "################ LOG BEGIN ################"
 #######################################
 # Configurable Variables by Config File
 #--------------------------------------
-$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
-$ScriptDir = "C:\Users\vincent\Desktop\Github Repositories\UniTrix\Source"
+$ScriptDir = [System.Environment]::CurrentDirectory
 $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
 
