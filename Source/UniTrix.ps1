@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.0"
+$version = "2.0.2"
 $ProgramName = "UniTrix"
 ########################################
 $UnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
