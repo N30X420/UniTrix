@@ -345,7 +345,7 @@ $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
 
 Write-Host "$ScriptConfig"
-test
+
 
 # Check for UniTrix.cfg
 if (-Not (Test-Path $ScriptConfig)){
