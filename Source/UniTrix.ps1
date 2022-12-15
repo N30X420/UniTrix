@@ -194,6 +194,19 @@ function UI_UPDATE_SVC {
         else {
             Write-Host "Manually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
+            while ($null -eq $UpdateDownloaded) {
+                Write-Host "Update downloaded ? (Y/N)"
+                $UpdateDownloaded = $Host.UI.RawUI.ReadKey()
+                if ($UpdateDownloaded.Character -eq "N") {
+                    Write-Host "Please download the latest Unifi Network Controller Software"
+                    $UpdateDownloaded = $null
+                }
+                else {
+                    Write-Host "Starting Update" -ForegroundColor Yellow
+                    $UpdateDownloaded = $true
+                }
+            }
+
         }
 
         if ($null -eq $CustomVersion) {
@@ -322,7 +335,7 @@ $CurDate = Get-Date -Format "dd/MM/yyyy_HH/mm/ss"
 Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log" | Out-Null
 Write-Host " "
 Write-Host " "
-Write-Host "################ LOG BEGIN ################"
+Write-Host "################ LOG BEGIN ################" -ForegroundColor Magenta
 
 #######################################
 # Configurable Variables by Config File
@@ -330,6 +343,9 @@ Write-Host "################ LOG BEGIN ################"
 $ScriptDir = [System.Environment]::CurrentDirectory
 $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
+
+Write-Host "$ScriptConfig"
+test
 
 # Check for UniTrix.cfg
 if (-Not (Test-Path $ScriptConfig)){
@@ -381,14 +397,11 @@ $list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE'
  
 #menu offset to allow space to write a message above the menu
 $xmin = 3
-$ymin = 6
+$ymin = 8
  
 #Write Menu
 Clear-Host
 Logo
-Write-Host ""
-Write-Host ""
-Write-Host ""
 Write-Host ""
 Write-Host "  Use the up / down arrow to navigate and Enter to make a selection"
 [Console]::SetCursorPosition(0, $ymin)
