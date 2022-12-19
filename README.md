@@ -31,6 +31,7 @@ There are a few features already present and more will be added in the future
 
 ## To Do
 - Implement a way to check if required dependencies are installed
+- Custom Certificate Path when not using Certify The Web
 
 ## Debugging
 Logs are saved in C:\INSTALL\UniTrix-2.0\UniTrix-2.0-xx-xx-xxxx_xx-xx-xx.log
