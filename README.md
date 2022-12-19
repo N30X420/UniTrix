@@ -30,7 +30,6 @@ There are a few features already present and more will be added in the future
 - Eclipse Adoptium - JDK-11.x (For keytool & Unifi relies on Java 11)
 
 ## To Do
-- Fix controller updater
 - Implement a way to check if required dependencies are installed
 
 ## Debugging

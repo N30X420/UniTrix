@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.0"
+$version = "2.0.2"
 $ProgramName = "UniTrix"
 ########################################
 $UnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
@@ -12,50 +12,8 @@ $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe
 #######################################
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
+$host.UI.RawUI.WindowTitle = "$ProgramName - Version $version"
 #######################################
-#######################################
-# Configurable Variables by Config File
-#--------------------------------------
-$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
-$ScriptDir = "C:\Users\vincent\Desktop\Github Repositories\UniTrix\Source"
-$ScriptDir += "\$ProgramName.cfg"
-$ScriptConfig = $ScriptDir
-
-# Check for UniTrix.cfg
-if (-Not (Test-Path $ScriptConfig)){
-    Write-Host "Config file not found" -ForegroundColor Red
-    Start-Sleep -Seconds 2
-    New-Item -ItemType File -Path $ScriptConfig | Out-Null
-    Add-Content -Path $ScriptConfig -Value "fqdn = "
-    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
-    #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
-    #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
-    #Add-Content -Path $ScriptConfig -Value "JavaBin = "
-    Write-Host "Config File Created" -ForegroundColor Yellow
-    write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
-    Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
-    $error.Add("Unconfigured Config file") | Out-Null
-    Start-Sleep -Seconds 5
-    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
-
-# Read Config file
-$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
-
-# Define vars from config file
-$fqdn = $ScriptVars['fqdn']
-
-# Check if vars from config file are configured
-if ($fqdn -eq "") {
-    Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
-    $error.Add("FQDN not specified") | Out-Null
-    Start-Sleep -Seconds 5
-    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
 
 ###################################
 ####
@@ -122,12 +80,14 @@ function Logo {
 }
 
 function UI_INSTALL_SVC {
-    Write-Host "`nInstalling Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nINSTALL SERVICE" -ForegroundColor Blue
     try {
+        Write-Host "`n* Installing Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" installsvc
+        Write-Host "* Unifi Service Installed" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Unable to install Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to install Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -136,17 +96,18 @@ function UI_INSTALL_SVC {
 }
 
 function UI_UNINSTALL_SVC {
-    Write-Host "`nUninstalling Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nUNINSTALL SERVICE" -ForegroundColor Blue
     try {
-        Write-Host "Stopping Unifi Service" -ForegroundColor Yellow
+        Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" stopsvc
+        Write-Host "* Unifi Service Stopped" -ForegroundColor Yellow
         Start-Sleep -Seconds 2
-        Write-Host "Removing Unifi Service" -ForegroundColor Yellow
+        Write-Host "* Removing Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" uninstallsvc
-        Write-Host "Unifi Service Removed" -ForegroundColor Yellow
+        Write-Host "* Unifi Service Removed" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Unable to uninstall Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to uninstall Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -155,12 +116,14 @@ function UI_UNINSTALL_SVC {
 }
 
 function UI_START_SVC {
-    Write-Host "`nStarting Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nSTART SERVICE" -ForegroundColor Blue
     try {
+        Write-Host "`n* Starting Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" startsvc
+        Write-Host "* Unifi Service Started" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Unable to start Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to start Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -169,12 +132,14 @@ function UI_START_SVC {
 }
 
 function UI_STOP_SVC {
-    Write-Host "`nStopping Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nSTOP SERVICE" -ForegroundColor Blue
     try {
+        Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" stopsvc
+        Write-Host "* Unifi Service Stopped" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Unable to stop Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to stop Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -183,18 +148,18 @@ function UI_STOP_SVC {
 }
 
 function UI_RESTART_SVC {
-    Write-Host "`nRestarting Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nRESTART SERVICE" -ForegroundColor Blue
     try {
-        Write-Host "Stopping Unifi Service" -ForegroundColor Yellow
+        Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" stopsvc
-        Write-Host "Unifi Service stopped" -ForegroundColor Yellow
+        Write-Host "* Unifi Service stopped" -ForegroundColor Yellow
         Start-Sleep -Seconds 5
-        Write-Host "Starting Unifi Service" -ForegroundColor Yellow
+        Write-Host "* Starting Unifi Service" -ForegroundColor Yellow
         & $JavaBin -jar "$UnifiRootDir\lib\ace.jar" startsvc
-        Write-Host "Unifi Service started" -ForegroundColor Yellow
+        Write-Host "* Unifi Service started" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Unable to restart Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to restart Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -203,7 +168,7 @@ function UI_RESTART_SVC {
 }
 
 function UI_SVC_STATUS {
-    Write-Host "`nGetting Unifi Service Status" -ForegroundColor Yellow
+    Write-Host "`nSERVICE STATUS" -ForegroundColor Blue
     try {
         get-service -name Unifi | Format-List
         start-sleep -Seconds 3
@@ -211,7 +176,7 @@ function UI_SVC_STATUS {
         $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
     catch {
-        Write-Host "Unable to get Unifi Service status" -ForegroundColor Red
+        Write-Host "`nUnable to get Unifi Service status" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -220,36 +185,54 @@ function UI_SVC_STATUS {
 }
 
 function UI_UPDATE_SVC {
-    Write-Host "`nUpdating Unifi Service" -ForegroundColor Yellow
+    Write-Host "`nUPDATE SERVICE" -ForegroundColor Blue
     try {
-        UI_STOP_SVC
-        start-sleep -Seconds 2
         UI_UNINSTALL_SVC
-        Write-Host "Fetching Controller Update" -ForegroundColor Yellow
-        Write-Host "Press any key to use a custom version or wait 5 seconds" -ForegroundColor Yellow
-        Start-Sleep -Seconds 5
-        if($host.UI.RawUI.KeyAvailable){
-           $CustomVersion = Read-Host "Custom Version"
-           Write-Host "Downloading version $CustomVersion" -ForegroundColor Yellow
-           Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
-           Write-Host "Update downloaded" -ForegroundColor Yellow
+        Write-Host "`nWould you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow
+        $DownloadManual = $Host.UI.RawUI.ReadKey()
+        if ($DownloadManual.Character -eq "N"){
+            Write-Host "`nEnter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
+            $CustomVersion = Read-Host "Custom Version"
+            Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
+            Write-Host "Update downloaded" -ForegroundColor Yellow
+            $UpdateDownloadType = 1
         }
 
         else {
-            Write-Host "Manually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
+            Write-Host "`nManually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
+            while ($null -eq $UpdateDownloaded) {
+                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow
+                $UpdateDownloaded = $Host.UI.RawUI.ReadKey()
+                if ($UpdateDownloaded.Character -eq "N") {
+                    Write-Host "`nPlease download the latest Unifi Network Controller Software" -ForegroundColor Yellow
+                    $UpdateDownloaded = $null
+                }
+                else {
+                    Write-Host "`nStarting Update" -ForegroundColor Yellow
+                    $UpdateDownloaded = $true
+                    $UpdateDownloadType = 2
+                }
+            }
         }
 
-        if ($null -ne $CustomVersion) {
+
+        if ($UpdateDownloadType -eq 1) {
             $UpdateFileLocation = "$tempdir\Unifi-installer.exe"
         }
-        else {
+        elseif ($UpdateDownloadType -eq 2) {
             $UpdateFileLocation = "$env:Userprofile\Downloads\Unifi-installer.exe"
+        }
+        else {
+            Write-Host "Unexpected error" -ForegroundColor Red
+            $error.Add("Unexpected error while update was preparing")
+            $error.add($_)
+            Write-Host $error -ForegroundColor Red
         }
 
         Start-Sleep -Seconds 2
         Write-Host "Starting Unifi Controller Update" -ForegroundColor Yellow
-        Start-Process -ErrorAction Stop -Wait "$UpdateFileLocation /S"
+        Start-Process -ErrorAction Stop -Wait "$UpdateFileLocation" /S
         Start-Sleep -Seconds 2
         Write-Host "Update Completed" -ForegroundColor Yellow
         UI_INSTALL_SVC
@@ -259,7 +242,7 @@ function UI_UPDATE_SVC {
 
     }
     catch {
-        Write-Host "Unable to update Unifi Service" -ForegroundColor Red
+        Write-Host "`nUnable to update Unifi Service" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -269,28 +252,30 @@ function UI_UPDATE_SVC {
 
 
 function UI_UPDATE_CERT {
-    Write-Host "`nUpdating Unifi Controller Certificate" -ForegroundColor Yellow
+    Write-Host "`nUPDATE CERTIFICATE" -ForegroundColor Blue
     try {
         UI_STOP_SVC
-        Write-Host "Unlocking Keystore" -ForegroundColor Yellow
+        Write-Host "* Unlocking Keystore" -ForegroundColor Yellow
         Set-ItemProperty -Path "$UnifiRootDir\Data\keystore" -Name IsReadOnly -Value $false
         Start-Sleep -Seconds 2
         
-        Write-Host "Replacing certificate" -ForegroundColor Yellow
+        Write-Host "* Replacing certificate" -ForegroundColor Yellow
         $NewCert = Get-ChildItem $CTWAssetsDir | Sort-Object LastWriteTime | Select-Object -last 1
         $Params = "-importkeystore -srckeystore ""$CTWAssetsDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
         $Prms   = $Params.Split(" ")
         & "$KeyToolBin" $Prms
+        Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
+
 
         Copy-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore" "$env:Userprofile\Ubiquiti UniFi\data\keystore" -Recurse -force
         Remove-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore"
-        Write-Host "Locking Keystore" -ForegroundColor Yellow
+        Write-Host "* Locking Keystore" -ForegroundColor Yellow
         Set-ItemProperty -Path "$UnifiRootDir\Data\keystore" -Name IsReadOnly -Value $true
         UI_START_SVC
 
     }
     catch {
-        Write-Host "Unable to renew & install certificate" -ForegroundColor Red
+        Write-Host "`nUnable to renew & install certificate" -ForegroundColor Red
         Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
         $error.Add($_)
         Write-Host $error -ForegroundColor Red
@@ -316,11 +301,6 @@ function UI_EXIT {
     
 }
 
-
-
-
-
-
 #####################################################################
 # Main Code --- Main Code --- Main Code --- Main Code --- Main Code #
 #-------------------------------------------------------------------#
@@ -333,8 +313,7 @@ Write-Host
 Write-Host "----------------------------" -ForegroundColor Magenta
 write-Host "| Always trust the process |" -ForegroundColor Magenta
 Write-Host "----------------------------" -ForegroundColor Magenta
-Start-Sleep -Seconds 5
-$host.UI.RawUI.WindowTitle = "$ProgramName - Version $version"
+Start-Sleep -Seconds 3
 
 
 # Check admin rights
@@ -346,12 +325,12 @@ function isadmin
  if (isadmin -eq "True") {
 
      Write-Host "`nGot Administrator Permissions" -ForegroundColor Green
-     Start-Sleep -Seconds 2
+     Start-Sleep -Seconds 1
 
  }
  else {
      Write-Host "`nThis script needs Administrator Privileges to work it's magic" -ForegroundColor Red
-     Start-Sleep -Seconds 2
+     Start-Sleep -Seconds 3
  }
  if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
   if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
@@ -368,15 +347,63 @@ if (-Not (Test-Path $tempdir)){
 
 # Start Logging in Install directory (Tempdir)
 $CurDate = Get-Date -Format "dd/MM/yyyy_HH/mm/ss"
-Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log"
+Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log" | Out-Null
 Write-Host " "
 Write-Host " "
-Write-Host "################ LOG BEGIN ################"
+Write-Host "################ LOG BEGIN ################" -ForegroundColor Magenta
+
+#######################################
+# Configurable Variables by Config File
+#--------------------------------------
+$ScriptDir = [System.Environment]::CurrentDirectory
+$ScriptDir += "\$ProgramName.cfg"
+$ScriptConfig = $ScriptDir
+
+Write-Host "$ScriptConfig"
 
 
+# Check for UniTrix.cfg
+if (-Not (Test-Path $ScriptConfig)){
+    Write-Host "Config file not found" -ForegroundColor Red
+    Start-Sleep -Seconds 2
+    New-Item -ItemType File -Path $ScriptConfig | Out-Null
+    Add-Content -Path $ScriptConfig -Value "FQDN = "
+    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
+    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
+    #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
+    #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
+    #Add-Content -Path $ScriptConfig -Value "JavaBin = "
+    Write-Host "Config File Created" -ForegroundColor Yellow
+    write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
+    Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
+    $error.Add("Unconfigured Config file") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+# Read Config file
+$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
+
+# Define vars from config file
+$fqdn = $ScriptVars['FQDN']
+
+# Check if vars from config file are configured
+if ($fqdn -eq "") {
+    Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
+    $error.Add("FQDN not specified") | Out-Null
+    Start-Sleep -Seconds 5
+    Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
+##################################
+# Begin Loop
 $WhileLoopVar = 1
 while ($WhileLoopVar -eq 1){
-
+##################################
 ##################################
 # Interactive Menu #
 ##################################
@@ -385,16 +412,13 @@ $list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE'
  
 #menu offset to allow space to write a message above the menu
 $xmin = 3
-$ymin = 6
+$ymin = 10
  
 #Write Menu
 Clear-Host
 Logo
 Write-Host ""
-Write-Host ""
-Write-Host ""
-Write-Host ""
-Write-Host "  Use the up / down arrow to navigate and Enter to make a selection"
+Write-Host "  Use the up / down arrow to navigate and Enter to make a selection" -ForegroundColor Yellow
 [Console]::SetCursorPosition(0, $ymin)
 foreach ($name in $List) {
     for ($i = 0; $i -lt $xmin; $i++) {
