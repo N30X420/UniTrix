@@ -6,7 +6,6 @@ $ProgramName = "UniTrix"
 ########################################
 $UnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\INSTALL\$ProgramName-$version"
-$CTWAssetsDir = "C:\ProgramData\Certify\assets\$fqdn"
 $KeyToolBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\keytool.exe"
 $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe"
 #######################################
@@ -260,8 +259,8 @@ function UI_UPDATE_CERT {
         Start-Sleep -Seconds 2
         
         Write-Host "* Replacing certificate" -ForegroundColor Yellow
-        $NewCert = Get-ChildItem $CTWAssetsDir | Sort-Object LastWriteTime | Select-Object -last 1
-        $Params = "-importkeystore -srckeystore ""$CTWAssetsDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+        $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+        $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
         $Prms   = $Params.Split(" ")
         & "$KeyToolBin" $Prms
         Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
@@ -367,9 +366,12 @@ if (-Not (Test-Path $ScriptConfig)){
     Write-Host "Config file not found" -ForegroundColor Red
     Start-Sleep -Seconds 2
     New-Item -ItemType File -Path $ScriptConfig | Out-Null
-    Add-Content -Path $ScriptConfig -Value "FQDN = "
-    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
-    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
+    Add-Content -Path $ScriptConfig -Value "### FQDN - Enter certificate subject ###"
+    Add-Content -Path $ScriptConfig -Value "FQDN="
+    Add-Content -Path $ScriptConfig -Value "### CertPath - Enter custom certificate path ###"
+    Add-Content -Path $ScriptConfig -Value "CertPath="
+    #Add-Content -Path $ScriptConfig -Value "Controller-Version = "
+    Add-Content -Path $ScriptConfig -Value "UnifiRootDir="
     #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
     #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
     #Add-Content -Path $ScriptConfig -Value "JavaBin = "
@@ -383,20 +385,41 @@ if (-Not (Test-Path $ScriptConfig)){
     exit
 }
 
-# Read Config file
-$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
+# Read Config file and set variables
+Foreach ($i in $(Get-Content $ScriptConfig)){
+    Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
+}
 
-# Define vars from config file
-$fqdn = $ScriptVars['FQDN']
 
 # Check if vars from config file are configured
-if ($fqdn -eq "") {
+if ($null -eq  $FQDN) {
     Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
     $error.Add("FQDN not specified") | Out-Null
     Start-Sleep -Seconds 5
     Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
     $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
+}
+
+# Check if vars from config file are configured
+if ($null -eq $CertPath) {
+    Write-Host "No custom certificate path set. Using Default Certify The Web Path" -ForegroundColor Yellow
+    $CertDir = "C:\ProgramData\Certify\assets\$FQDN"
+}
+else {
+    Write-Host "Custom certificate path configured :" -ForegroundColor Yellow
+    write-Host "$CertPath"
+    $CertDir = $CertPath
+}
+
+# Check if vars from config file are configured
+if ($UnifiRootDir -eq "$env:Userprofile\Ubiquiti UniFi") {
+    Write-Host "Using default root directory for Unifi Controller Installation" -ForegroundColor Yellow
+    Write-host "$UnifiRootDir"
+}
+else {
+    Write-Host "Custom Unifi Installation path configured :" -ForegroundColor Yellow
+    write-Host "$UnifiRootDir"
 }
 
 ##################################
