@@ -1,10 +1,10 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.0.2"
+$version = "2-beta.3"
 $ProgramName = "UniTrix"
 ########################################
-$UnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
+$DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\INSTALL\$ProgramName-$version"
 $KeyToolBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\keytool.exe"
 $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe"
@@ -257,15 +257,28 @@ function UI_UPDATE_CERT {
         Write-Host "* Unlocking Keystore" -ForegroundColor Yellow
         Set-ItemProperty -Path "$UnifiRootDir\Data\keystore" -Name IsReadOnly -Value $false
         Start-Sleep -Seconds 2
-        
         Write-Host "* Replacing certificate" -ForegroundColor Yellow
-        $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
-        $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
-        $Prms   = $Params.Split(" ")
-        & "$KeyToolBin" $Prms
+
+        if ($CustomCert -eq $false) {
+            $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+            $Prms   = $Params.Split(" ")
+            & "$KeyToolBin" $Prms
+            
+        }
+        elseif ($CustomCert -eq $true) {
+            $Params = "-importkeystore -srckeystore ""$CertDir"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+            $Prms   = $Params.Split(" ")
+            & "$KeyToolBin" $Prms
+        }
+
+        else {
+            Write-Host "Unexpected error has occurred" -ForegroundColor Red
+            $error.Add("Unexpected error has occurred - Certificate Path")
+            Write-Host $error -ForegroundColor Red
+        }
+
         Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
-
-
         Copy-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore" "$env:Userprofile\Ubiquiti UniFi\data\keystore" -Recurse -force
         Remove-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore"
         Write-Host "* Locking Keystore" -ForegroundColor Yellow
@@ -358,8 +371,6 @@ $ScriptDir = [System.Environment]::CurrentDirectory
 $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
 
-Write-Host "$ScriptConfig"
-
 
 # Check for UniTrix.cfg
 if (-Not (Test-Path $ScriptConfig)){
@@ -371,6 +382,7 @@ if (-Not (Test-Path $ScriptConfig)){
     Add-Content -Path $ScriptConfig -Value "### CertPath - Enter custom certificate path ###"
     Add-Content -Path $ScriptConfig -Value "CertPath="
     #Add-Content -Path $ScriptConfig -Value "Controller-Version = "
+    Add-Content -Path $ScriptConfig -Value "### UnifiRootDir - Different Root folder for Unifi Installation ###"
     Add-Content -Path $ScriptConfig -Value "UnifiRootDir="
     #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
     #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
@@ -405,23 +417,25 @@ if ($null -eq  $FQDN) {
 if ($null -eq $CertPath) {
     Write-Host "No custom certificate path set. Using Default Certify The Web Path" -ForegroundColor Yellow
     $CertDir = "C:\ProgramData\Certify\assets\$FQDN"
+    $CustomCert = $false
 }
 else {
     Write-Host "Custom certificate path configured :" -ForegroundColor Yellow
     write-Host "$CertPath"
     $CertDir = $CertPath
+    $CustomCert = $true
 }
 
 # Check if vars from config file are configured
-if ($UnifiRootDir -eq "$env:Userprofile\Ubiquiti UniFi") {
+if ($null -eq $UnifiRootDir) {
     Write-Host "Using default root directory for Unifi Controller Installation" -ForegroundColor Yellow
+    $UnifiRootDir = $DefaultUnifiRootDir
     Write-host "$UnifiRootDir"
 }
 else {
     Write-Host "Custom Unifi Installation path configured :" -ForegroundColor Yellow
     write-Host "$UnifiRootDir"
 }
-
 ##################################
 # Begin Loop
 $WhileLoopVar = 1
