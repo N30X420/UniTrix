@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2-beta.3"
+$version = "2-beta.4"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
@@ -267,7 +267,19 @@ function UI_UPDATE_CERT {
             
         }
         elseif ($CustomCert -eq $true) {
-            $Params = "-importkeystore -srckeystore ""$CertDir"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+            Write-Host "`nIs the certificate password protected ? (Y/N)" -ForegroundColor Yellow
+            $RequireExportPass = $Host.UI.RawUI.ReadKey()
+            if ($RequireExportPass -eq "Y") {
+                Write-Host "Enter certificate password" -ForegroundColor Yellow
+                $CertSPass = Read-Host "Password" -AsSecureString
+                $CertPass =[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($CertSPass))
+            }
+            else {
+                Write-Host "No password" -ForegroundColor Yellow
+                $CertPass.Clear()
+            }
+            $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass ""$CertPass"" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
             $Prms   = $Params.Split(" ")
             & "$KeyToolBin" $Prms
         }
@@ -320,7 +332,7 @@ SplashLogo
 Write-Host "Unifi Controller Management Program" -ForegroundColor Yellow
 Write-Host "MATRIXNET ~ Vincent" -ForegroundColor Yellow
 Write-Host "INCONEL BV ~ Vincent" -ForegroundColor Yellow
-Write-Host "Version $version" -ForegroundColor Yellow
+Write-Host "Version $version" -ForegroundColor Blue
 Write-Host
 Write-Host "----------------------------" -ForegroundColor Magenta
 write-Host "| Always trust the process |" -ForegroundColor Magenta
