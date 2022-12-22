@@ -1,12 +1,11 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.0.2"
+$version = "2-beta.4"
 $ProgramName = "UniTrix"
 ########################################
-$UnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
+$DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\INSTALL\$ProgramName-$version"
-$CTWAssetsDir = "C:\ProgramData\Certify\assets\$fqdn"
 $KeyToolBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\keytool.exe"
 $JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe"
 #######################################
@@ -188,7 +187,7 @@ function UI_UPDATE_SVC {
     Write-Host "`nUPDATE SERVICE" -ForegroundColor Blue
     try {
         UI_UNINSTALL_SVC
-        Write-Host "`nWould you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow
+        Write-Host "`nWould you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow -NoNewline
         $DownloadManual = $Host.UI.RawUI.ReadKey()
         if ($DownloadManual.Character -eq "N"){
             Write-Host "`nEnter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
@@ -202,7 +201,7 @@ function UI_UPDATE_SVC {
             Write-Host "`nManually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
             while ($null -eq $UpdateDownloaded) {
-                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow
+                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow -NoNewline
                 $UpdateDownloaded = $Host.UI.RawUI.ReadKey()
                 if ($UpdateDownloaded.Character -eq "N") {
                     Write-Host "`nPlease download the latest Unifi Network Controller Software" -ForegroundColor Yellow
@@ -258,15 +257,40 @@ function UI_UPDATE_CERT {
         Write-Host "* Unlocking Keystore" -ForegroundColor Yellow
         Set-ItemProperty -Path "$UnifiRootDir\Data\keystore" -Name IsReadOnly -Value $false
         Start-Sleep -Seconds 2
-        
         Write-Host "* Replacing certificate" -ForegroundColor Yellow
-        $NewCert = Get-ChildItem $CTWAssetsDir | Sort-Object LastWriteTime | Select-Object -last 1
-        $Params = "-importkeystore -srckeystore ""$CTWAssetsDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
-        $Prms   = $Params.Split(" ")
-        & "$KeyToolBin" $Prms
+
+        if ($CustomCert -eq $false) {
+            $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+            $Prms   = $Params.Split(" ")
+            & "$KeyToolBin" $Prms
+            
+        }
+        elseif ($CustomCert -eq $true) {
+            Write-Host "`nIs the certificate password protected ? (Y/N)" -ForegroundColor Yellow -NoNewline
+            $RequireExportPass = $Host.UI.RawUI.ReadKey()
+            if ($RequireExportPass.Character -eq "Y") {
+                Write-Host "`nnter certificate password" -ForegroundColor Yellow
+                $CertSPass = Read-Host "Password" -AsSecureString
+                $CertPass =[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($CertSPass))
+            }
+            else {
+                Write-Host "`nNo password" -ForegroundColor Yellow
+                $CertPass = ""
+            }
+            $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass ""$CertPass"" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
+            $Prms   = $Params.Split(" ")
+            & "$KeyToolBin" $Prms
+        }
+
+        else {
+            Write-Host "Unexpected error has occurred" -ForegroundColor Red
+            $error.Add("Unexpected error has occurred - Certificate Path")
+            Write-Host $error -ForegroundColor Red
+        }
+
         Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
-
-
         Copy-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore" "$env:Userprofile\Ubiquiti UniFi\data\keystore" -Recurse -force
         Remove-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore"
         Write-Host "* Locking Keystore" -ForegroundColor Yellow
@@ -308,7 +332,7 @@ SplashLogo
 Write-Host "Unifi Controller Management Program" -ForegroundColor Yellow
 Write-Host "MATRIXNET ~ Vincent" -ForegroundColor Yellow
 Write-Host "INCONEL BV ~ Vincent" -ForegroundColor Yellow
-Write-Host "Version $version" -ForegroundColor Yellow
+Write-Host "Version $version" -ForegroundColor Blue
 Write-Host
 Write-Host "----------------------------" -ForegroundColor Magenta
 write-Host "| Always trust the process |" -ForegroundColor Magenta
@@ -359,17 +383,19 @@ $ScriptDir = [System.Environment]::CurrentDirectory
 $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
 
-Write-Host "$ScriptConfig"
-
 
 # Check for UniTrix.cfg
 if (-Not (Test-Path $ScriptConfig)){
     Write-Host "Config file not found" -ForegroundColor Red
     Start-Sleep -Seconds 2
     New-Item -ItemType File -Path $ScriptConfig | Out-Null
-    Add-Content -Path $ScriptConfig -Value "FQDN = "
-    Add-Content -Path $ScriptConfig -Value "Controller-Version = "
-    #Add-Content -Path $ScriptConfig -Value "UnifiRootDir = "
+    Add-Content -Path $ScriptConfig -Value "### FQDN - Enter certificate subject ###"
+    Add-Content -Path $ScriptConfig -Value "FQDN="
+    Add-Content -Path $ScriptConfig -Value "### CertPath - Enter custom certificate path ###"
+    Add-Content -Path $ScriptConfig -Value "CertPath="
+    #Add-Content -Path $ScriptConfig -Value "Controller-Version = "
+    Add-Content -Path $ScriptConfig -Value "### UnifiRootDir - Different Root folder for Unifi Installation ###"
+    Add-Content -Path $ScriptConfig -Value "UnifiRootDir="
     #Add-Content -Path $ScriptConfig -Value "CTWAssetsDir = "
     #Add-Content -Path $ScriptConfig -Value "KeyToolBin = "
     #Add-Content -Path $ScriptConfig -Value "JavaBin = "
@@ -383,14 +409,14 @@ if (-Not (Test-Path $ScriptConfig)){
     exit
 }
 
-# Read Config file
-$ScriptVars = Get-Content -raw -Path $ScriptConfig | ConvertFrom-StringData
+# Read Config file and set variables
+Foreach ($i in $(Get-Content $ScriptConfig)){
+    Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
+}
 
-# Define vars from config file
-$fqdn = $ScriptVars['FQDN']
 
 # Check if vars from config file are configured
-if ($fqdn -eq "") {
+if ($null -eq  $FQDN) {
     Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
     $error.Add("FQDN not specified") | Out-Null
     Start-Sleep -Seconds 5
@@ -399,6 +425,29 @@ if ($fqdn -eq "") {
     exit
 }
 
+# Check if vars from config file are configured
+if ($null -eq $CertPath) {
+    Write-Host "No custom certificate path set. Using Default Certify The Web Path" -ForegroundColor Yellow
+    $CertDir = "C:\ProgramData\Certify\assets\$FQDN"
+    $CustomCert = $false
+}
+else {
+    Write-Host "Custom certificate path configured :" -ForegroundColor Yellow
+    write-Host "$CertPath"
+    $CertDir = $CertPath
+    $CustomCert = $true
+}
+
+# Check if vars from config file are configured
+if ($null -eq $UnifiRootDir) {
+    Write-Host "Using default root directory for Unifi Controller Installation" -ForegroundColor Yellow
+    $UnifiRootDir = $DefaultUnifiRootDir
+    Write-host "$UnifiRootDir"
+}
+else {
+    Write-Host "Custom Unifi Installation path configured :" -ForegroundColor Yellow
+    write-Host "$UnifiRootDir"
+}
 ##################################
 # Begin Loop
 $WhileLoopVar = 1
