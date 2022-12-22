@@ -19,10 +19,10 @@ There are a few features already present and more will be added in the future
 ## How to use ?
 1. Make sure you have all the dependencies installed on your system. For a list please see the notes section below.
 2. Run the binary UniTrix.exe
-3. A config file (UniTrix.cfg) will be created. In this file you need to specify some parameters.
-   1, FQDN - Fully Qualified Domain Name used in the certificate
-   2, CertPath - [Optional] Set a custom folder for your certificates (if you are not using Certify The Web)
-   3, UnifiRootDir - [Optional] Specify the Unifi installation directory (normally located in: C:\Users\Administrator\Ubiquiti Unifi)
+3. A config file (UniTrix.cfg) will be created. In this file you need to specify some parameters. 
+    - FQDN - Fully Qualified Domain Name used in the certificate
+    - CertPath - [Optional] Set a custom folder for your certificates (if you are not using Certify The Web)
+    - UnifiRootDir - [Optional] Specify the Unifi installation directory (normally located in: C:\Users\Administrator\Ubiquiti Unifi)
 
 4. Run the binary UniTrix.exe again
 5. Then use the arrow keys and enter to navigate the menu.
@@ -32,9 +32,9 @@ There are a few features already present and more will be added in the future
 ### Dependencies
 - Eclipse Adoptium - JDK-11.x (For keytool & Unifi relies on Java 11)
 
-## To Do
+### To Do
 - Implement a way to check if required dependencies are installed
 
 
-## Debugging
+### Debugging
 Logs are saved in C:\INSTALL\UniTrix-2.0\UniTrix-2.0-xx-xx-xxxx_xx-xx-xx.log
