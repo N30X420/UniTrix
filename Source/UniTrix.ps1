@@ -201,7 +201,7 @@ function UI_UPDATE_SVC {
             Write-Host "`nManually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
             while ($null -eq $UpdateDownloaded) {
-                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow -NoNewline
+                Write-Host "`nUpdate downloaded ? (Y/N)" -ForegroundColor Yellow -NoNewline
                 $UpdateDownloaded = $Host.UI.RawUI.ReadKey()
                 if ($UpdateDownloaded.Character -eq "N") {
                     Write-Host "`nPlease download the latest Unifi Network Controller Software" -ForegroundColor Yellow
@@ -420,7 +420,7 @@ Foreach ($i in $(Get-Content $ScriptConfig)){
 
 
 # Check if vars from config file are configured
-if ($null -eq  $FQDN) {
+if ($FQDN -eq "") {
     Write-Host "Fully Qualified Domain Name not specified in $ProgramName.cfg" -ForegroundColor Red
     $error.Add("FQDN not specified") | Out-Null
     Start-Sleep -Seconds 5
@@ -443,7 +443,7 @@ else {
 }
 
 # Check if vars from config file are configured
-if ($null -eq $UnifiRootDir) {
+if ($UnifiRootDir -eq "") {
     Write-Host "Using default root directory for Unifi Controller Installation" -ForegroundColor Yellow
     $UnifiRootDir = $DefaultUnifiRootDir
     Write-host "$UnifiRootDir"
