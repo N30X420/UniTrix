@@ -193,7 +193,7 @@ function UI_UPDATE_SVC {
             Write-Host "`nEnter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
             $CustomVersion = Read-Host "Custom Version"
             Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
-            Write-Host "Update downloaded" -ForegroundColor Yellow
+            Write-Host "* Update downloaded" -ForegroundColor Yellow
             $UpdateDownloadType = 1
         }
 
@@ -208,7 +208,7 @@ function UI_UPDATE_SVC {
                     $UpdateDownloaded = $null
                 }
                 else {
-                    Write-Host "`nStarting Update" -ForegroundColor Yellow
+                    Write-Host "`n* Starting Update" -ForegroundColor Yellow
                     $UpdateDownloaded = $true
                     $UpdateDownloadType = 2
                 }
@@ -230,13 +230,17 @@ function UI_UPDATE_SVC {
         }
 
         Start-Sleep -Seconds 2
-        Write-Host "Starting Unifi Controller Update" -ForegroundColor Yellow
+        Write-Host "* Starting Unifi Controller Update" -ForegroundColor Yellow
         Start-Process -ErrorAction Stop -Wait "$UpdateFileLocation" /S
         Start-Sleep -Seconds 2
-        Write-Host "Update Completed" -ForegroundColor Yellow
+        Write-Host "* Update Completed" -ForegroundColor Yellow
         UI_INSTALL_SVC
         Start-Sleep -Seconds 2
         UI_START_SVC
+        Write-Host "* Removing Update File" -ForegroundColor Yellow
+        Remove-Item -Path $UpdateFileLocation -Force -Confirm:$false
+        Write-Host "* Update File Removed" -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
 
 
     }
@@ -426,7 +430,7 @@ if ($null -eq  $FQDN) {
 }
 
 # Check if vars from config file are configured
-if ($null -eq $CertPath) {
+if ($CertPath -eq "") {
     Write-Host "No custom certificate path set. Using Default Certify The Web Path" -ForegroundColor Yellow
     $CertDir = "C:\ProgramData\Certify\assets\$FQDN"
     $CustomCert = $false
