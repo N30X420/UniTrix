@@ -187,7 +187,7 @@ function UI_UPDATE_SVC {
     Write-Host "`nUPDATE SERVICE" -ForegroundColor Blue
     try {
         UI_UNINSTALL_SVC
-        Write-Host "`nWould you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow
+        Write-Host "`nWould you like to manualy download the new controller version ? (Y/N)" -ForegroundColor Yellow -NoNewline
         $DownloadManual = $Host.UI.RawUI.ReadKey()
         if ($DownloadManual.Character -eq "N"){
             Write-Host "`nEnter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
@@ -201,7 +201,7 @@ function UI_UPDATE_SVC {
             Write-Host "`nManually download latest installer from Ubiquiti Unifi" -ForegroundColor Yellow
             start-process "https://www.ui.com/download/unifi/"
             while ($null -eq $UpdateDownloaded) {
-                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow
+                Write-Host "Update downloaded ? (Y/N)" -ForegroundColor Yellow -NoNewline
                 $UpdateDownloaded = $Host.UI.RawUI.ReadKey()
                 if ($UpdateDownloaded.Character -eq "N") {
                     Write-Host "`nPlease download the latest Unifi Network Controller Software" -ForegroundColor Yellow
@@ -267,16 +267,16 @@ function UI_UPDATE_CERT {
             
         }
         elseif ($CustomCert -eq $true) {
-            Write-Host "`nIs the certificate password protected ? (Y/N)" -ForegroundColor Yellow
+            Write-Host "`nIs the certificate password protected ? (Y/N)" -ForegroundColor Yellow -NoNewline
             $RequireExportPass = $Host.UI.RawUI.ReadKey()
-            if ($RequireExportPass -eq "Y") {
-                Write-Host "Enter certificate password" -ForegroundColor Yellow
+            if ($RequireExportPass.Character -eq "Y") {
+                Write-Host "`nnter certificate password" -ForegroundColor Yellow
                 $CertSPass = Read-Host "Password" -AsSecureString
                 $CertPass =[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($CertSPass))
             }
             else {
-                Write-Host "No password" -ForegroundColor Yellow
-                $CertPass.Clear()
+                Write-Host "`nNo password" -ForegroundColor Yellow
+                $CertPass = ""
             }
             $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
             $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass ""$CertPass"" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
