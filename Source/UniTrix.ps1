@@ -1,13 +1,13 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2-beta.4"
+$version = "2-beta.5"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\INSTALL\$ProgramName-$version"
-$KeyToolBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\keytool.exe"
-$JavaBin = "C:\Program Files\Eclipse Adoptium\jdk-11.0.17.8-hotspot\bin\java.exe"
+$KeyToolBin = "C:\Program Files\Eclipse Adoptium\jre-17.0.8.101-hotspot\bin\keytool.exe"
+$JavaBin = "C:\Program Files\Eclipse Adoptium\jre-17.0.8.101-hotspot\bin\java.exe"
 #######################################
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
