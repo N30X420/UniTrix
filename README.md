@@ -30,8 +30,8 @@ There are a few features already present and more will be added in the future
 
 ## Notes
 ### Dependencies
-- Eclipse Adoptium - JDK-11.x (For keytool & Unifi relies on Java 11)
-
+- Eclipse Adoptium - JDK-17.x (For keytool & Unifi relies on Java 17)
+    https://adoptium.net/temurin/releases/?os=windows&arch=x64&package=jre&version=17
 ### To Do
 - Implement a way to check if required dependencies are installed
 
