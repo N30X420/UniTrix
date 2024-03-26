@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2-beta.5"
+$version = "2-beta.6"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
@@ -271,10 +271,11 @@ function UI_UPDATE_CERT {
             
         }
         elseif ($CustomCert -eq $true) {
-            Write-Host "`nIs the certificate password protected ? (Y/N)" -ForegroundColor Yellow -NoNewline
-            $RequireExportPass = $Host.UI.RawUI.ReadKey()
-            if ($RequireExportPass.Character -eq "Y") {
-                Write-Host "`nnter certificate password" -ForegroundColor Yellow
+            Write-Host "`nIs the certificate password protected ? (Y/N) : " -ForegroundColor Yellow -NoNewline
+            Start-Sleep -Milliseconds 500
+            $RequireExportPass = Read-Host
+            if ($RequireExportPass -eq "Y" -or "y") {
+                Write-Host "`nEnter certificate password" -ForegroundColor Yellow
                 $CertSPass = Read-Host "Password" -AsSecureString
                 $CertPass =[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($CertSPass))
             }
@@ -293,6 +294,11 @@ function UI_UPDATE_CERT {
             $error.Add("Unexpected error has occurred - Certificate Path")
             Write-Host $error -ForegroundColor Red
         }
+
+        Write-Host "Changing Alias to unifi" -ForegroundColor Yellow
+        $srcAlias = &"$KeyToolBin" -v -list -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise" | Select-String -SimpleMatch "Alias name"
+        $srcAliasFormatted = $srcAlias -replace "Alias name: ", ""
+        & "$KeyToolBin" -changealias -alias $srcAliasFormatted -destalias "unifi" -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise"
 
         Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
         Copy-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore" "$env:Userprofile\Ubiquiti UniFi\data\keystore" -Recurse -force
