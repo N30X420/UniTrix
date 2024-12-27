@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2-beta.6"
+$version = "2.7"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
@@ -335,6 +335,94 @@ function UI_EXIT {
     
 }
 
+function CheckMongoShell {
+    try {
+        Write-Host "`nChecking MongoDB Shell" -ForegroundColor Yellow
+        $MongoShell = "C:\Program Files\mongosh\mongosh.exe"
+        if (-Not (Test-Path $MongoShell)){
+            Write-Host "`nMongoDB Shell not found" -ForegroundColor Red
+            InstallMongoShell
+        }
+        else {
+            Write-Host "`nMongoDB Shell found" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        $error.Add("Unexpected error has occurred while checking MongoDB-Shell")
+    }
+    
+}
+function InstallMongoShell {
+    try {
+        Write-Host "`nInstalling MongoDB Shell" -ForegroundColor Yellow
+        $MongoShell = "https://github.com/mongodb-js/mongosh/releases/download/v2.3.2/mongosh-2.3.2-x64.msi"
+        $MongoShellPath = "$tempdir\MongoDB-Shell.msi"
+        Invoke-WebRequest -Uri $MongoShell -OutFile $MongoShellPath
+        $MSIArguments = @(
+            "/i $MongoShellPath ALLUSERS='1'"
+            "/passive"
+            "/norestart"
+        )
+        Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow 
+        Write-Host "MongoDB Shell Installed" -ForegroundColor Yellow
+    }
+    catch {
+        $error.Add("Unexpected error has occurred while installing MongoDB-Shell")
+    }
+}
+
+function MongoDBConnect {
+    try {
+        Write-Host "`nConnecting to MongoDB" -ForegroundColor Yellow
+        Start-Process "mongosh" -ArgumentList "--port 27117" -Wait -NoNewWindow
+        Write-Host "Connected to MongoDB" -ForegroundColor Yellow
+    }
+    catch {
+        Write-Host "`nUnable to connect to MongoDB" -ForegroundColor Red
+        Write-Host "Check logs for more information about the error" -ForegroundColor Yellow
+        $error.Add($_)
+        CheckMongoShell
+        Start-Sleep -Seconds 5
+    }
+}
+
+function MongoDBSearchDevice {
+    Write-Host "`nSearch Device in MongoDB" -ForegroundColor Yellow
+    Write-Host "Enter MAC Address" -ForegroundColor Yellow
+    $mac = Read-Host "MAC Address ::"
+    $Arguments = @(
+            "--port 27117"
+            "--eval db.getSiblingDB('ace').device.find({'mac':'$mac'})"
+        )
+    try {
+        Start-Process "mongosh" -ArgumentList $Arguments -Wait -NoNewWindow
+    }
+    catch {
+        $error.Add("Unexpected error has occurred")
+        $error.Add($_)
+        CheckMongoShell
+        Start-Sleep -Seconds 5
+    }
+}
+
+function MongoDBDeleteDevice {
+    Write-Host "`nDelete Device in MongoDB" -ForegroundColor Yellow
+    Write-Host "Enter MAC Address" -ForegroundColor Yellow
+    $mac = Read-Host "MAC Address ::"
+    $Arguments = @(
+            "--port 27117"
+            "--eval db.getSiblingDB('ace').device.deleteOne({'mac':'$mac'})"
+        )
+    try {
+        Start-Process "mongosh" -ArgumentList $Arguments -Wait -NoNewWindow
+    }
+    catch {
+        $error.Add("Unexpected error has occurred")
+        $error.Add($_)
+        CheckMongoShell
+        Start-Sleep -Seconds 5
+    }
+}
 #####################################################################
 # Main Code --- Main Code --- Main Code --- Main Code --- Main Code #
 #-------------------------------------------------------------------#
@@ -467,7 +555,7 @@ while ($WhileLoopVar -eq 1){
 # Interactive Menu #
 ##################################
 #Menu items
-$list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE','STOP SERVICE','RESTART SERVICE','UPDATE CONTROLLER','UPDATE CERTIFICATE','EXIT')
+$list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE','STOP SERVICE','RESTART SERVICE','UPDATE CONTROLLER','UPDATE CERTIFICATE','MONGODB SHELL','MONGODB SEARCH DEVICE','MONGODB DELETE DEVICE','EXIT')
  
 #menu offset to allow space to write a message above the menu
 $xmin = 3
@@ -547,6 +635,9 @@ switch ($selection) {
     "RESTART SERVICE" {UI_RESTART_SVC}
     "UPDATE CONTROLLER" {UI_UPDATE_SVC}
     "UPDATE CERTIFICATE" {UI_UPDATE_CERT}
+    "MONGODB SHELL" {MongoDBConnect}
+    "MONGODB SEARCH DEVICE" {MongoDBSearchDevice}
+    "MONGODB DELETE DEVICE" {MongoDBDeleteDevice}
     "EXIT" {UI_EXIT}
 }
 }
