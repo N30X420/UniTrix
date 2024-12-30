@@ -413,7 +413,19 @@ function CheckJava {
         if (-Not (Test-Path "$JavaPath\bin\java.exe")){
             Write-Host "`nJava not found" -ForegroundColor Red
             Write-Warning "Java is required to run this script"
-            Write-Host "`nPlease install Java from https://adoptopenjdk.net/" -ForegroundColor Yellow
+            Write-Host "`nInstall java ? (y/n)" -ForegroundColor Yellow
+            $InstallJava = $Host.UI.RawUI.ReadKey()
+            if ($InstallJava.Character -eq "Y" -or "y"){
+                InstallJava
+            }
+            else {
+                Write-Host "`nJava is required to run this script" -ForegroundColor Red
+                $error.Add("Java not found")
+                Start-Sleep -Seconds 5
+                Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
+                $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                exit
+            }
         }
         else {
             Write-Host "`nJava found" -ForegroundColor Yellow
@@ -526,8 +538,8 @@ if (-Not (Test-Path $ScriptConfig)){
     Add-Content -Path $ScriptConfig -Value "CertPath="
     Add-Content -Path $ScriptConfig -Value "### UnifiRootDir - Custom root folder for Unifi installation ###"
     Add-Content -Path $ScriptConfig -Value "UnifiRootDir="
-    Add-Content -Path $ScriptConfig -Value "### JavaPath - Custom Java bin path ###"
-    Add-Content -Path $ScriptConfig -Value "JavaPath = "
+    Add-Content -Path $ScriptConfig -Value "### JavaRootPath - Custom Java bin path ###"
+    Add-Content -Path $ScriptConfig -Value "JavaRootPath= "
     Write-Host "Config File Created" -ForegroundColor Yellow
     write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
     Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
@@ -578,13 +590,13 @@ else {
 }
 
 # Check if vars from config file are configured
-if ($CustomJavaPath -eq "") {
+if ($JavaRootPath -eq "") {
     Write-Host "Using Java Located at : $JavaPath" -ForegroundColor Yellow
 }
 else {
     Write-Host "Custom Java path configured :" -ForegroundColor Yellow
-    write-Host "$CustomJavaPath"
-    $JavaPath = $CustomJavaPath
+    write-Host "$JavaRootPath"
+    $JavaPath = $JavaRootPath
 }
 ##################################
 # Begin Loop
