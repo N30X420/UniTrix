@@ -6,7 +6,7 @@ $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\INSTALL\$ProgramName-$version"
-$JavaPath = "C:\Program Files\Eclipse Adoptium\jre-" + (Get-ChildItem "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
+$JavaPath = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
 
 #######################################
 $error.clear()
@@ -607,7 +607,7 @@ while ($WhileLoopVar -eq 1){
 # Interactive Menu #
 ##################################
 #Menu items
-$list = @('SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE','STOP SERVICE','RESTART SERVICE','UPDATE CONTROLLER','UPDATE CERTIFICATE','MONGODB SHELL','MONGODB SEARCH DEVICE','MONGODB DELETE DEVICE','EXIT')
+$list = @('CHECK JAVA','SERVICE STATUS','INSTALL SERVICE','UNINSTALL SERVICE','START SERVICE','STOP SERVICE','RESTART SERVICE','UPDATE CONTROLLER','UPDATE CERTIFICATE','MONGODB SHELL','MONGODB SEARCH DEVICE','MONGODB DELETE DEVICE','EXIT')
  
 #menu offset to allow space to write a message above the menu
 $xmin = 3
@@ -679,6 +679,7 @@ while ($menu_active) {
  
 Clear-Host
 switch ($selection) {
+    "CHECK JAVA" {CheckJava}
     "SERVICE STATUS" {UI_SVC_STATUS}
     "INSTALL SERVICE" {UI_INSTALL_SVC}
     "UNINSTALL SERVICE" {UI_UNINSTALL_SVC}
