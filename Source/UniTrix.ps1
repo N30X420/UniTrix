@@ -415,17 +415,17 @@ function CheckJava {
             Write-Host "`nJava not found" -ForegroundColor Red
             Write-Warning "Java is required to run this script"
             Write-Host "`nInstall java ? (y/n)" -ForegroundColor Yellow
-            $InstallJava = $Host.UI.RawUI.ReadKey()
-            if ($InstallJava.Character -eq "Y" -or "y"){
-                InstallJava
-            }
-            else {
+            $InstallJava = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+            if ($InstallJava.Character -ine "Y" -or "y"){
                 Write-Host "`nJava is required to run this script" -ForegroundColor Red
                 $error.Add("Java not found")
                 Start-Sleep -Seconds 5
                 Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
                 $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                exit
+                break
+            }
+            else {
+                InstallJava
             }
         }
         else {
