@@ -12,6 +12,7 @@ $JavaPath = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem "C:\Program Fi
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
 $host.UI.RawUI.WindowTitle = "$ProgramName - Version $version"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 #######################################
 
 ###################################
