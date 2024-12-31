@@ -6,8 +6,7 @@ $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
 $tempdir = "C:\MATRIXNET\$ProgramName-$version"
-$JavaPath = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem -ErrorAction silentlycontinue "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
-
+$JavaRootDir = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem -ErrorAction SilentlyContinue "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
 #######################################
 $error.clear()
 $ProgressPreference = 'SilentlyContinue'
@@ -48,7 +47,7 @@ function UI_INSTALL_SVC {
     Write-Host "`nINSTALL SERVICE" -ForegroundColor Blue
     try {
         Write-Host "`n* Installing Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" installsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" installsvc
         Write-Host "* Unifi Service Installed" -ForegroundColor Yellow
     }
     catch {
@@ -63,11 +62,11 @@ function UI_UNINSTALL_SVC {
     Write-Host "`nUNINSTALL SERVICE" -ForegroundColor Blue
     try {
         Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" stopsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" stopsvc
         Write-Host "* Unifi Service Stopped" -ForegroundColor Yellow
         Start-Sleep -Seconds 2
         Write-Host "* Removing Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" uninstallsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" uninstallsvc
         Write-Host "* Unifi Service Removed" -ForegroundColor Yellow
     }
     catch {
@@ -82,7 +81,7 @@ function UI_START_SVC {
     Write-Host "`nSTART SERVICE" -ForegroundColor Blue
     try {
         Write-Host "`n* Starting Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" startsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" startsvc
         Write-Host "* Unifi Service Started" -ForegroundColor Yellow
     }
     catch {
@@ -97,7 +96,7 @@ function UI_STOP_SVC {
     Write-Host "`nSTOP SERVICE" -ForegroundColor Blue
     try {
         Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" stopsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" stopsvc
         Write-Host "* Unifi Service Stopped" -ForegroundColor Yellow
     }
     catch {
@@ -112,11 +111,11 @@ function UI_RESTART_SVC {
     Write-Host "`nRESTART SERVICE" -ForegroundColor Blue
     try {
         Write-Host "`n* Stopping Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" stopsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" stopsvc
         Write-Host "* Unifi Service stopped" -ForegroundColor Yellow
         Start-Sleep -Seconds 5
         Write-Host "* Starting Unifi Service" -ForegroundColor Yellow
-        & "$JavaPath\bin\java.exe" -jar "$UnifiRootDir\lib\ace.jar" startsvc
+        & $JavaRootDir\bin\java.exe -jar "$UnifiRootDir\lib\ace.jar" startsvc
         Write-Host "* Unifi Service started" -ForegroundColor Yellow
     }
     catch {
@@ -152,6 +151,7 @@ function UI_UPDATE_SVC {
         if ($DownloadManual.Character -eq "N"){
             Write-Host "`nEnter Custom version number (Example: 7.3.76)" -ForegroundColor Yellow
             $CustomVersion = Read-Host "Custom Version"
+            Write-Host "Downloading Unifi installer for version: $CustomVersion" -ForegroundColor Cyan
             Invoke-WebRequest -Uri "https://dl.ui.com/unifi/$CustomVersion/UniFi-installer.exe" -OutFile "$tempdir\Unifi-installer.exe"
             Write-Host "* Update downloaded" -ForegroundColor Yellow
             $UpdateDownloadType = 1
@@ -223,9 +223,10 @@ function UI_UPDATE_CERT {
 
         if ($CustomCert -eq $false) {
             $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            Write-Host "Using certificate: $NewCert" -ForegroundColor Cyan
             $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass """" -destkeystore ""$env:Userprofile\Ubiquiti UniFi\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
             $Prms   = $Params.Split(" ")
-            & "$JavaPath\bin\keytool.exe" $Prms
+            & $JavaRootDir\bin\keytool.exe $Prms
             
         }
         elseif ($CustomCert -eq $true) {
@@ -242,9 +243,10 @@ function UI_UPDATE_CERT {
                 $CertPass = ""
             }
             $NewCert = Get-ChildItem $CertDir | Sort-Object LastWriteTime | Select-Object -last 1
+            Write-Host "Using certificate: $NewCert" -ForegroundColor Cyan
             $Params = "-importkeystore -srckeystore ""$CertDir\$NewCert"" -srcstoretype pkcs12 -srcstorepass ""$CertPass"" -destkeystore ""$UnifiRootDir\data\newstore"" -deststoretype pkcs12 -deststorepass ""aircontrolenterprise"" -destkeypass ""aircontrolenterprise"""
             $Prms   = $Params.Split(" ")
-            & "$JavaPath\bin\keytool.exe" $Prms
+            & $JavaRootDir\bin\keytool.exe $Prms
         }
 
         else {
@@ -254,9 +256,9 @@ function UI_UPDATE_CERT {
         }
 
         Write-Host "Changing Alias to unifi" -ForegroundColor Yellow
-        $srcAlias = &"$JavaPath\bin\keytool.exe" -v -list -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise" | Select-String -SimpleMatch "Alias name"
+        $srcAlias = &$JavaRootDir\bin\keytool.exe -v -list -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise" | Select-String -SimpleMatch "Alias name"
         $srcAliasFormatted = $srcAlias -replace "Alias name: ", ""
-        & "$JavaPath\bin\keytool.exe" -changealias -alias $srcAliasFormatted -destalias "unifi" -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise"
+        & $JavaRootDir\bin\keytool.exe -changealias -alias $srcAliasFormatted -destalias "unifi" -storetype pkcs12 -keystore "$UnifiRootDir\data\newstore" -storepass "aircontrolenterprise"
 
         Write-Host "* Certificate Replaced Successfully" -ForegroundColor Yellow
         Copy-Item "$env:Userprofile\Ubiquiti UniFi\data\newstore" "$env:Userprofile\Ubiquiti UniFi\data\keystore" -Recurse -force
@@ -294,7 +296,7 @@ function UI_EXIT {
 function CheckMongoShell {
     try {
         Write-Host "`nChecking MongoDB Shell" -ForegroundColor Yellow
-        $MongoShell = "C:\Program Files\mongosh\mongosh.exe"
+        Write-Host "MongoDB Shell Path: $MongoShell" -ForegroundColor Cyan
         if (-Not (Test-Path $MongoShell)){
             Write-Host "`nMongoDB Shell not found" -ForegroundColor Red
             InstallMongoShell
@@ -310,9 +312,11 @@ function CheckMongoShell {
 function InstallMongoShell {
     try {
         Write-Host "`nInstalling MongoDB Shell" -ForegroundColor Yellow
-        $MongoShell = "https://github.com/mongodb-js/mongosh/releases/download/v2.3.2/mongosh-2.3.2-x64.msi"
+        $MongoShellURL = "https://github.com/mongodb-js/mongosh/releases/download/v2.3.2/mongosh-2.3.2-x64.msi"
         $MongoShellPath = "$tempdir\MongoDB-Shell.msi"
-        Invoke-WebRequest -Uri $MongoShell -OutFile $MongoShellPath
+        Write-Host "Downloading MongoDB Shell from: $MongoShellURL" -ForegroundColor Cyan
+        Write-Host "Saving to: $MongoShellPath" -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $MongoShellURL -OutFile $MongoShellPath
         $MSIArguments = @(
             "/i $MongoShellPath ALLUSERS='1'"
             "/passive"
@@ -328,7 +332,7 @@ function InstallMongoShell {
 function MongoDBConnect {
     try {
         Write-Host "`nConnecting to MongoDB" -ForegroundColor Yellow
-        Start-Process "mongosh" -ArgumentList "--port 27117" -Wait -NoNewWindow
+        Start-Process $MongoShell -ArgumentList "--port 27117" -Wait -NoNewWindow
         Write-Host "Connected to MongoDB" -ForegroundColor Yellow
     }
     catch {
@@ -348,7 +352,7 @@ function MongoDBSearchDevice {
             "--eval db.getSiblingDB('ace').device.find({'mac':'$mac'})"
         )
     try {
-        Start-Process "mongosh" -ArgumentList $Arguments -Wait -NoNewWindow
+        Start-Process $MongoShell -ArgumentList $Arguments -Wait -NoNewWindow
     }
     catch {
         $error.Add("Unexpected error has occurred")
@@ -366,7 +370,7 @@ function MongoDBDeleteDevice {
             "--eval db.getSiblingDB('ace').device.deleteOne({'mac':'$mac'})"
         )
     try {
-        Start-Process "mongosh" -ArgumentList $Arguments -Wait -NoNewWindow
+        Start-Process $MongoShell -ArgumentList $Arguments -Wait -NoNewWindow
     }
     catch {
         $error.Add("Unexpected error has occurred")
@@ -378,29 +382,33 @@ function MongoDBDeleteDevice {
 function CheckJava {
     try {
         Write-Host "`nChecking if Java is installed on your system" -ForegroundColor Yellow
-        if (-Not (Test-Path "$JavaPath\bin\java.exe")){
-            Write-Host "`nJava not found" -ForegroundColor Red
+        Write-Host "JavaRootDir: $JavaRootDir" -ForegroundColor Cyan
+        $JavaExePath = "$JavaRootDir\bin\java.exe"
+        Write-Host "Checking path: $JavaExePath" -ForegroundColor Cyan
+        $JavaCheck = Test-Path $JavaExePath
+        if ($JavaCheck -eq $false) {
+            Write-Host "Java not found" -ForegroundColor Red
             Write-Warning "Java is required to run this script"
             Write-Host "`nInstall java ? (y/n)" -ForegroundColor Yellow
             $InstallJava = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-            if ($InstallJava.Character -ine "y"){
+            if ($InstallJava.Character -ine "y") {
                 Write-Host "`nJava is required to run this script" -ForegroundColor Red
                 $error.Add("Java not found")
                 Start-Sleep -Seconds 5
                 Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
                 $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
                 UI_EXIT
-            }
-            else {
+            } else {
                 InstallJava
             }
-        }
-        else {
+        } else {
             Write-Host "`nJava found" -ForegroundColor Yellow
+            Start-Sleep -Seconds 2
         }
-    }
-    catch {
-        $error.Add("Unexpected error has occurred while checking Java")
+    } catch {
+        Write-Host "`nAn error occurred while checking for Java" -ForegroundColor Red
+        $error.Add($_)
+        Start-Sleep -Seconds 5
     }
 }
 function InstallJava {
@@ -412,9 +420,10 @@ function InstallJava {
             Write-Host "`nUninstalling Old Java JRE" -ForegroundColor Yellow
             try {
                 foreach ($OldJava in $OldJavaJRE.IdentifyingNumber){
+                    Write-Host "Uninstalling Java JRE with ID: $OldJava" -ForegroundColor Cyan
                     $MSIArguments = @(
                     "/x $OldJava"
-                    "/qn"
+                    "/passive"
                     "/norestart"
                     )
                     Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow 
@@ -429,14 +438,19 @@ function InstallJava {
         Write-Host "`nInstalling Java" -ForegroundColor Yellow
         $JavaURL = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jre_x64_windows_hotspot_21.0.5_11.msi"
         $JavaJREInstallerPath = "$tempdir\JavaJRE.msi"
+        Write-Host "Downloading Java JRE from: $JavaURL" -ForegroundColor Cyan
+        Write-Host "Saving to: $JavaJREInstallerPath" -ForegroundColor Cyan
         Invoke-WebRequest -Uri $JavaURL -OutFile $JavaJREInstallerPath
+        Write-Host "Java JRE downloaded successfully" -ForegroundColor Yellow
         $MSIArguments = @(
             "/i $JavaJREInstallerPath ALLUSERS='1'"
             "/passive"
             "/norestart"
         )
+        Write-Host "Starting Java JRE installation" -ForegroundColor Yellow
         Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow 
         Write-Host "Java Installed" -ForegroundColor Yellow
+        Write-Warning "Restart $ProgramName" -ForegroundColor Yellow
     }
     catch {
         write-host "`nUnexpected error has occurred while installing Java" -ForegroundColor Red
@@ -475,13 +489,13 @@ function isadmin { ([Security.Principal.WindowsPrincipal] [Security.Principal.Wi
   }
 }
 
-# Check Install Folder
+# Check Program Folder
 if (-Not (Test-Path $tempdir)){
     New-Item -ItemType Directory -Path $tempdir
 }
 
-# Start Logging in Install directory (Tempdir)
-$CurDate = Get-Date -Format "dd/MM/yyyy_HH/mm/ss"
+# Start Logging in Program directory (Tempdir)
+$CurDate = Get-Date -Format "dd-MM-yyyy_HH-mm-ss"
 Start-Transcript -Path $tempdir\"$ProgramName-$version-$CurDate.log" | Out-Null
 Write-Host " "
 Write-Host " "
@@ -503,11 +517,13 @@ if (-Not (Test-Path $ScriptConfig)){
     Add-Content -Path $ScriptConfig -Value "### FQDN - Enter certificate subject ###"
     Add-Content -Path $ScriptConfig -Value "FQDN="
     Add-Content -Path $ScriptConfig -Value "### CertPath - Custom certificate path ###"
-    Add-Content -Path $ScriptConfig -Value "CertPath="
+    Add-Content -Path $ScriptConfig -Value "CertPath=$tempdir\Certificates"
     Add-Content -Path $ScriptConfig -Value "### UnifiRootDir - Custom root folder for Unifi installation ###"
-    Add-Content -Path $ScriptConfig -Value "UnifiRootDir="
-    Add-Content -Path $ScriptConfig -Value "### JavaRootPath - Custom Java bin path ###"
-    Add-Content -Path $ScriptConfig -Value "JavaRootPath= "
+    Add-Content -Path $ScriptConfig -Value "UnifiRootDir=$DefaultUnifiRootDir"
+    Add-Content -Path $ScriptConfig -Value "### JavaRootPath - Java bin path ###"
+    Add-Content -Path $ScriptConfig -Value "JavaRootPath=$DefaultUnifiRootDir\jre"
+    Add-Content -Path $ScriptConfig -Value "### MongoDB Shell Path - Path to MongoDB Shell ###"
+    Add-Content -Path $ScriptConfig -Value "MongoDBShellPath=C:\Program Files\mongosh\mongosh.exe"
     Write-Host "Config File Created" -ForegroundColor Yellow
     write-host "`nPlease configure $ProgramName.cfg located here $ScriptDir" -ForegroundColor Yellow
     Write-Host "Restart $ProgramName to load configuration" -ForegroundColor Yellow
@@ -544,6 +560,9 @@ else {
     write-Host "$CertPath"
     $CertDir = $CertPath
     $CustomCert = $true
+    if (-Not (Test-Path $CertDir)){
+        New-Item -ItemType Directory -Path $CertDir
+}
 }
 
 # Check if vars from config file are configured
@@ -559,13 +578,26 @@ else {
 
 # Check if vars from config file are configured
 if ($JavaRootPath -eq "") {
-    Write-Host "Using Java Located at : $JavaPath" -ForegroundColor Yellow
+    Write-Host "Using Java Located at : $JavaRootDir" -ForegroundColor Yellow
 }
 else {
     Write-Host "Custom Java path configured :" -ForegroundColor Yellow
     write-Host "$JavaRootPath"
-    $JavaPath = $JavaRootPath
+    $JavaRootDir = $JavaRootPath
 }
+
+if ($MongoDBShellPath -eq "") {
+    Write-Host "Using Default MongoDB Shell Path" -ForegroundColor Yellow
+    $MongoDBShellPath = "C:\Program Files\mongosh\mongosh.exe"
+    $MongoShell = $MongoDBShellPath
+}
+else {
+    Write-Host "Custom MongoDB Shell Path configured :" -ForegroundColor Yellow
+    write-Host "$MongoDBShellPath"
+    $MongoShell = $MongoDBShellPath
+}
+
+
 ##################################
 # Begin Loop
 $WhileLoopVar = 1
@@ -584,6 +616,7 @@ $ymin = 10
 #Write Menu
 Clear-Host
 Logo
+$host.UI.RawUI.WindowTitle = "$ProgramName - Version $version"
 Write-Host ""
 Write-Host "  Use the up / down arrow to navigate and Enter to make a selection" -ForegroundColor Yellow
 [Console]::SetCursorPosition(0, $ymin)
