@@ -1,40 +1,47 @@
 # UniTrix
--------------------------------------------------
-Unifi Controller Management Script - By Vincent | MATRIXNET
--------------------------------------------------
-This is an automated script to manage your Ubiquiti Unifi Network Controller for Windows
+
+UniTrix is a PowerShell script designed to manage Ubiquiti UniFi Controller services, update certificates, and interact with MongoDB for device management.
 
 ## Features
-There are a few features already present and more will be added in the future
 
-1. Install Service - Installs the Unifi Network Controller as a service in Windows
-2. Uninstall Service - Removes the installed Unifi Network Controller service from Windows
-3. Start Service - Starts the Unifi Network Controller Service in Windows
-4. Stop Service - Stops the Unifi Network Controller Service in Windows
-5. Restart Service - Restarts the Unifi Network Controller Service in Windows
-6. Update Controller - Updates the Unifi Network Controller to the latest version (Currently not working)
-7. Update Certificate - Updates the SSL Certificate used by the Unifi Network Controller (See notes below!)
-8. Exit - Closes UniTrix
+- Install, uninstall, start, stop, and restart UniFi services
+- Update UniFi Controller
+- Update SSL certificates
+- Check and install Java
+- Check and install MongoDB Shell
+- Connect to MongoDB
+- Search and delete devices in MongoDB
 
-## How to use ?
-1. Make sure you have all the dependencies installed on your system. For a list please see the notes section below.
-2. Run the binary UniTrix.exe
-3. A config file (UniTrix.cfg) will be created. In this file you need to specify some parameters. 
-    - FQDN - Fully Qualified Domain Name used in the certificate
-    - CertPath - [Optional] Set a custom folder for your certificates (if you are not using Certify The Web)
-    - UnifiRootDir - [Optional] Specify the Unifi installation directory (normally located in: C:\Users\Administrator\Ubiquiti Unifi)
+## Debug Features
 
-4. Run the binary UniTrix.exe again
-5. Then use the arrow keys and enter to navigate the menu.
+The script now includes enhanced debug information to help troubleshoot issues. Debug messages are displayed in the console and logged in the transcript file.
 
+## Usage
 
-## Notes
-### Dependencies
-- Eclipse Adoptium - JDK-17.x (For keytool & Unifi relies on Java 17)
-    https://adoptium.net/temurin/releases/?os=windows&arch=x64&package=jre&version=17
-### To Do
-- Implement a way to check if required dependencies are installed
+1. **Download the latest UniTrix.exe release:**
+    ```sh
+    https://github.com/N30X420/UniTrix/releases
+    ```
+2. **Run UniTrix.exe from desktop**
 
+3. **Follow the on-screen instructions to navigate through the menu and perform desired actions.**
 
-### Debugging
-Logs are saved in C:\INSTALL\UniTrix-2.0\UniTrix-2.0-xx-xx-xxxx_xx-xx-xx.log
+## Configuration
+
+The script uses a configuration file (`UniTrix.cfg`) to set various parameters. If the configuration file is not found, it will be created automatically with default values. You can edit this file to customize the settings.
+
+### Configuration Parameters
+
+- `FQDN`: Fully Qualified Domain Name for the certificate
+- `CertPath`: Custom path for the SSL certificate
+- `UnifiRootDir`: Custom root directory for UniFi installation
+- `JavaRootPath`: Custom path for Java installation
+- `MongoDBShellPath`: Path to MongoDB Shell
+
+## Logging
+
+The script logs all actions and debug information to a log file located in the `C:\MATRIXNET\UniTrix-<version>` directory. The log file is named with the format `UniTrix-<version>-<date>.log`.
+
+## Troubleshooting
+
+If you encounter any issues, check the log file for detailed debug information. The log file is located in the `C:\MATRIXNET\UniTrix-<version>` directory specified in the script.
