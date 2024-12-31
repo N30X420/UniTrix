@@ -1,12 +1,12 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.8"
+$version = "2.8.1"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
-$tempdir = "C:\INSTALL\$ProgramName-$version"
-$JavaPath = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
+$tempdir = "C:\MATRIXNET\$ProgramName-$version"
+$JavaPath = "C:\Program Files\Eclipse Adoptium\" + (Get-ChildItem -ErrorAction silentlycontinue "C:\Program Files\Eclipse Adoptium" | Sort-Object LastWriteTime | Select-Object -last 1).Name
 
 #######################################
 $error.clear()
@@ -21,53 +21,20 @@ $host.UI.RawUI.WindowTitle = "$ProgramName - Version $version"
 #--------------------------------------
 # Logo
 function SplashLogo {
-    Write-Host "                                                                                " -ForegroundColor Red
-    Write-Host "                              *####(((///*****////(/.                            " -ForegroundColor Red
-    Write-Host "                        (#####((/*,,....         ....,**/(.                      " -ForegroundColor Red
-    Write-Host "                    #######((*,..                    (@@&#%#                     " -ForegroundColor Red
-    Write-Host "                .########(/*,..                 @@&##%%%%#((#%#.                 " -ForegroundColor Red
-    Write-Host "              ##########(/*......          (@&&%#(((#%&&&&&&&%%%%#               " -ForegroundColor Red
-    Write-Host "            ##(,..*####(/*,,.........  /@&&&&&&&&&&&&&&&&&&&&&&&&%&#             " -ForegroundColor Red
-    Write-Host "          ##(. .*(#####(/*,,,,,....,@@&&&&&&&&&&&&&&&&&&&&%(.    ..,*//*,        " -ForegroundColor Red
-    Write-Host "        /##(..*((,/###((/****,,,*@@&&&&&&&&&&&&&&&&&&,             ..,,*,/       " -ForegroundColor Red
-    Write-Host "       ################((///*#@@&&&&&&&&&&&&&&&*                     ....,/      " -ForegroundColor Red
-    Write-Host "      #################((((@@&&&&&&&&&&&&&#......                      ...,/,    " -ForegroundColor Red
-    Write-Host "     ###################@@&&&&&&&&&&&&#***,,,,...                        .,*(    " -ForegroundColor Red
-    Write-Host "    (################%@&&&&&&&&&&&&(/////****,,,..                        .*/(   " -ForegroundColor Red
-    Write-Host "    #%#############@@&&&&&&&&&&%#(((((((////****,,..                      .*/(/  " -ForegroundColor Red
-    Write-Host "   ,#%%%%########@@&&&&&&&&&##########(((((////*****,,,..                 .*(##  " -ForegroundColor Red
-    Write-Host "   /%%%%%%%%###@@&&&&&&&&&&&&&&&&&%%#####(((((/////*****,,,,,...          ./(##  " -ForegroundColor Red
-    Write-Host "   /&&%%%%%%%@@&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&#((///*****,,,,,,..       ,/(##  " -ForegroundColor Red
-    Write-Host "   /#&&&&&%%%%%%%#######%@@@@&&&&&&&&&&&&&&&&&&&&&&&&&&&&%(***,,.         */(##  " -ForegroundColor Red
-    Write-Host "    (&&&&&&&%%%%%%%%##############&@@&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&#,,,..*//(#(  " -ForegroundColor Red
-    Write-Host "    (&&&&&&&&&&%%%%%%%##################%@@&&&&&&&&&&&&&&&&&&&&&&@@&#*..*//(##   " -ForegroundColor Red
-    Write-Host "     #&&&&&&&&&&&&%%%%%%%############((((((#%&&&&&&&&&&&&&&&@@&%*      *//((#*   " -ForegroundColor Red
-    Write-Host "      #&&&&&&&&&&&&&%%%%%%%##########((#%&&&&&&&&&&&&&&@@&#*         *///((#(    " -ForegroundColor Red
-    Write-Host "       #&&&&&&&&&&&&&&%%%%%%%%######%&&&&&&&&&&&&&@@&#*            *////((#/     " -ForegroundColor Red
-    Write-Host "        %&&&&&&&&&&&&&&&%%%%%%%%%&&&&&&&&&&&&@@&(/.             .*/////(##.      " -ForegroundColor Red
-    Write-Host "         .&&&&&&&&&&&&&&&%%%%&&&&&&&&&&&@@&(/*,             .,*//////((##        " -ForegroundColor Red
-    Write-Host "           #&&&&&&&&&&%&&&@@@@@&&&&@@&##((((///***,,,,,**//////////((##        " -ForegroundColor Red  
-    Write-Host "             *@&&&&&&&@@@@@@@@@&%%#####((((((((((///////////////((##(  " -ForegroundColor Red          
-    Write-Host "                &@#@@@@@@&&%%%%%#######(((((((((((//////////(((#(#.     " -ForegroundColor Red     
-    Write-Host "                    .&&&&&%%%%#########((((((((((((///(((((####         " -ForegroundColor Red
-    Write-Host "                       &&&&&&&%%%%######((((((((((((#######             " -ForegroundColor Red
-    Write-Host "                            .###%%&&&&&&&&%%%%%%%####,                  " -ForegroundColor Red        
-    Write-Host "                                                                        " -ForegroundColor Red
+write-host ""
+write-host "███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗" -ForegroundColor White -NoNewline
+Write-host "███╗   ██╗███████╗████████╗" -ForegroundColor Red
+write-host "████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝" -ForegroundColor white -NoNewline
+Write-Host "████╗  ██║██╔════╝╚══██╔══╝" -ForegroundColor Red
+write-host "██╔████╔██║███████║   ██║   ██████╔╝██║ ╚███╔╝ " -ForegroundColor White -NoNewline
+Write-Host "██╔██╗ ██║█████╗     ██║   " -ForegroundColor Red
+write-host "██║╚██╔╝██║██╔══██║   ██║   ██╔══██╗██║ ██╔██╗ " -ForegroundColor White -NoNewline
+Write-Host "██║╚██╗██║██╔══╝     ██║   " -ForegroundColor Red
+write-host "██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║██║██╔╝ ██╗" -ForegroundColor White -NoNewline
+write-host "██║ ╚████║███████╗   ██║   " -ForegroundColor Red
+write-host "╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝" -ForegroundColor White -NoNewline
+write-host "╚═╝  ╚═══╝╚══════╝   ╚═╝   " -ForegroundColor Red                                         
 
-
-
-    Write-Host "___ _   _  ____ ___  _   _ _____ _        ______     __                                                           "
-    Write-Host "|_ _| \ | |/ ___/ _ \| \ | | ____| |      | __ ) \   / /                                                           "
-    Write-Host " | ||  \| | |  | | | |  \| |  _| | |      |  _ \\ \ / /                                                            "
-    Write-Host " | || |\  | |__| |_| | |\  | |___| |___   | |_) |\ V /                                                             "
-    Write-Host "|___|_| \_|\____\___/|_| \_|_____|_____|  |____(_)\_(_)                                                            "
-    Write-Host "__        __   _        ___     _   _      _                      _      ____        _       _   _                 "
-    Write-Host "\ \      / /__| |__    ( _ )   | \ | | ___| |___      _____  _ __| | __ / ___|  ___ | |_   _| |_(_) ___  _ __  ___ "
-    Write-Host " \ \ /\ / / _ \ '_ \   / _ \/\ |  \| |/ _ \ __\ \ /\ / / _ \| '__| |/ / \___ \ / _ \| | | | | __| |/ _ \| '_ \/ __|"
-    Write-Host "  \ V  V /  __/ |_) | | (_>  < | |\  |  __/ |_ \ V  V / (_) | |  |   <   ___) | (_) | | |_| | |_| | (_) | | | \__ \"
-    Write-Host "   \_/\_/ \___|_.__/   \___/\/ |_| \_|\___|\__| \_/\_/ \___/|_|  |_|\_\ |____/ \___/|_|\__,_|\__|_|\___/|_| |_|___/"
-    Write-Host "                                                                                                                   "
-    Write-Host ""
 }
 function Logo {
     Write-Host " "
@@ -416,13 +383,13 @@ function CheckJava {
             Write-Warning "Java is required to run this script"
             Write-Host "`nInstall java ? (y/n)" -ForegroundColor Yellow
             $InstallJava = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-            if ($InstallJava.Character -ine "Y" -or "y"){
+            if ($InstallJava.Character -ine "y"){
                 Write-Host "`nJava is required to run this script" -ForegroundColor Red
                 $error.Add("Java not found")
                 Start-Sleep -Seconds 5
                 Write-Host "`nPress a key to exit $ProgramName" -ForegroundColor Yellow
                 $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-                break
+                UI_EXIT
             }
             else {
                 InstallJava
@@ -438,6 +405,7 @@ function CheckJava {
 }
 function InstallJava {
     try {
+        Write-Host "Checking for old Java JRE" -ForegroundColor Yellow
         $OldJavaJRE = Get-WmiObject win32_product | Where-Object{$_.name -match "Eclipse"}
         if ($OldJavaJRE){
             Write-Host "`nOld Java JRE found" -ForegroundColor Yellow
@@ -463,7 +431,7 @@ function InstallJava {
         $JavaJREInstallerPath = "$tempdir\JavaJRE.msi"
         Invoke-WebRequest -Uri $JavaURL -OutFile $JavaJREInstallerPath
         $MSIArguments = @(
-            "/i $JavaJREInstallPath ALLUSERS='1'"
+            "/i $JavaJREInstallerPath ALLUSERS='1'"
             "/passive"
             "/norestart"
         )
@@ -481,7 +449,6 @@ function InstallJava {
 SplashLogo
 Write-Host "Unifi Controller Management Program" -ForegroundColor Yellow
 Write-Host "MATRIXNET ~ Vincent" -ForegroundColor Yellow
-Write-Host "INCONEL BV ~ Vincent" -ForegroundColor Yellow
 Write-Host "Version $version" -ForegroundColor Blue
 Write-Host
 Write-Host "----------------------------" -ForegroundColor Magenta
@@ -523,7 +490,7 @@ Write-Host "################ LOG BEGIN ################" -ForegroundColor Magent
 #######################################
 # Configurable Variables by Config File
 #--------------------------------------
-$ScriptDir = [System.Environment]::CurrentDirectory
+$ScriptDir = $tempdir
 $ScriptDir += "\$ProgramName.cfg"
 $ScriptConfig = $ScriptDir
 
