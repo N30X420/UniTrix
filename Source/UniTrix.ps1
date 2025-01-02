@@ -1,7 +1,7 @@
 #######################################
 # Configurable Variables
 #--------------------------------------
-$version = "2.8.1"
+$version = "2.8.2"
 $ProgramName = "UniTrix"
 ########################################
 $DefaultUnifiRootDir = "$env:Userprofile\Ubiquiti UniFi"
@@ -353,6 +353,8 @@ function MongoDBSearchDevice {
         )
     try {
         Start-Process $MongoShell -ArgumentList $Arguments -Wait -NoNewWindow
+        Write-Host "`nPress a key to return" -ForegroundColor Yellow
+        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
     catch {
         $error.Add("Unexpected error has occurred")
@@ -371,6 +373,8 @@ function MongoDBDeleteDevice {
         )
     try {
         Start-Process $MongoShell -ArgumentList $Arguments -Wait -NoNewWindow
+        Write-Host "`nPress a key to return" -ForegroundColor Yellow
+        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
     catch {
         $error.Add("Unexpected error has occurred")
